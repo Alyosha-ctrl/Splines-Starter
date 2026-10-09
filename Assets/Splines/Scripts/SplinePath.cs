@@ -103,12 +103,12 @@ public class SplinePath : MonoBehaviour
         {
             return 0f;
         }
-        else if(distance == TotalLength)
+        else if(distance >= TotalLength)
         {
             return SegmentCount;
         }
         int low = 0;
-        int high = _distanceTable.Count-2;
+        int high = _distanceTable.Count-1;
         int mid = (low+high)/2;
 
         int startIndex = -1;
@@ -140,15 +140,30 @@ public class SplinePath : MonoBehaviour
             }
             counter += 1;
             mid = (low+high)/2;
-            //Exit condition for no infinite loops if it gets really out of wack
-            if(mid < 0 || mid > _distanceTable.Count-2) checker = false;
-            if(counter > _distanceTable.Count-1) checker = false;
+            // //Exit condition for no infinite loops if it gets really out of wack
+            // if(mid < 0) {
+            //     checker = false;
+            // }else if( mid > _distanceTable.Count - 2)
+            // {
+            //     print("Inside loop killer greater distance");
+            //     return SegmentCount;
+            // }
+            // if(counter > _distanceTable.Count - 1)
+            // {
+            //     print("Inside loop killer Counter");
+            //     checker = false;
+            //     return SegmentCount;
+            // } 
         }
+
+        // Debug.Log(endIndex);
         
         //The fraction along the u
         float fraction = (distance - _distanceTable[startIndex].distance)/(_distanceTable[endIndex].distance - _distanceTable[startIndex].distance);
         //How far you move forward on the u each time
         float step = _distanceTable[endIndex].u - _distanceTable[startIndex].u;
+
+        // Debug.Log(_distanceTable[startIndex].u + fraction*step);
 
         //Do the math on slide 9 for getting the inbetween thing
         return _distanceTable[startIndex].u + fraction*step;
