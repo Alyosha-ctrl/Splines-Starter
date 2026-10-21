@@ -23,6 +23,20 @@ public class FloatSpring
 
         // TODO: Add the restoring and damping forces and take one semi-implicit Euler step
         // toward equilibrium, updating _velocity and then _value.
+        float omega = 2f * Mathf.PI * frequencyHz;
+        float stiffness = omega*omega*deltaTime;
+
+        float critDamping = 2f*Mathf.Sqrt(stiffness*1);
+        float dampingCoefficient = critDamping*dampingRatio;
+
+        float restoreForce = -stiffness*(Value-equilibrium);
+        float dampingForce = -dampingCoefficient * _velocity;
+
+        float acceleration = restoreForce + dampingForce;
+
+        _velocity += acceleration*deltaTime;
+        _value += _velocity*deltaTime;
+
     }
 
     // Steps the spring in fixed 1/120 s chunks, however long the frame was. Call this once a frame.

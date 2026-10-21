@@ -35,18 +35,30 @@ public class JuicyButton : MonoBehaviour
     void Update()
     {
         // Let go anywhere and the button comes back up, even off the button.
-        if (_isButtonDown && !Input.GetMouseButtonDown(1))
+        if (_isButtonDown && !Input.GetMouseButtonDown(0))
             _isButtonDown = false;
 
         // A press only counts if the click lands on the button.
-        if (Input.GetButtonDown(MouseButton.LeftMouse.ToString()))
+        if (Input.GetMouseButton(0))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.compositionCursorPos);
+            // Debug.Log("Pressing");
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             _isButtonDown = Physics.Raycast(ray, out RaycastHit hitInfo) && hitInfo.transform == buttonCap;
+            // Debug.Log(_isButtonDown);
         }
 
         // TODO: Set the spring's equilibrium to 1 while the button is down and 0 when it is up,
-        // then step it with buttonSpring.Advance. Applying this to transforms happens in UpdateButtonVisuals 
+        // then step it with buttonSpring.Advance. Applying this to transforms happens in UpdateButtonVisuals
+        if(_isButtonDown)
+        {
+            buttonSpring.equilibrium = 1;
+        }
+        else
+        {
+            buttonSpring.equilibrium = 0;
+        }
+
+        buttonSpring.Advance(Time.deltaTime);
 
         UpdateButtonVisuals();
     }
@@ -57,6 +69,13 @@ public class JuicyButton : MonoBehaviour
         // toward downHeight, and to scale buttonRoot (the whole button) from upScale toward downScale.
         // Watch out: Don't clamp the value! When it goes past 0 or 1, that overshoot is the bounce.
         // Mathf.Lerp and Vector3.Lerp clamp to 0..1, so use their LerpUnclamped versions.
+        Vector3 currentCap = buttonCap.localPosition;
+        currentCap.y = Mathf.LerpUnclamped(upHeight, downHeight, buttonSpring.Value);
+
+        buttonCap.localPosition = currentCap;
+
+        Vector3 newScale = buttonRoot.localScale;
+        buttonRoot.localScale = Vector3.LerpUnclamped(upScale, downScale, buttonSpring.Value);
     }
 
     // Velocity, not a new target: the button wobbles and settles where it was.

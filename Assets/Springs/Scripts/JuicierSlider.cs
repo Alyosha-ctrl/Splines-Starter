@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 /*
    A 3D slider handle you drag along a track. Let go and it springs to the nearest slot.
@@ -70,7 +70,7 @@ public class JuicierSlider : MonoBehaviour
     void UpdatePressedState()
     {
         // Let go anywhere and the press ends, even off the slider.
-        if (_isPressed && !Mouse.current.leftButton.isPressed)
+        if (!Input.GetMouseButtonDown(0))
         {
             // TODO: On release, set handleSpring.equilibrium to the nearest slot,
             // NearestSlot(handleSpring.equilibrium). The spring carries the handle there.
@@ -79,11 +79,13 @@ public class JuicierSlider : MonoBehaviour
         }
 
         // A press only counts if the click lands on the slider or one of its parts.
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            // Debug.Log("Pressing");
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             _isPressed = Physics.Raycast(ray, out RaycastHit hitInfo)
                          && (hitInfo.transform == transform || hitInfo.transform.IsChildOf(transform));
+            // Debug.Log(_isPressed);
         }
     }
 
@@ -102,7 +104,7 @@ public class JuicierSlider : MonoBehaviour
     // Where the pointer is along the track, in the same units as handleSpring (0 is the middle).
     float PointerXOnTrack()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        Ray ray = Camera.main.ScreenPointToRay(Input.compositionCursorPos);
         Plane trackPlane = new(Vector3.up, transform.position);
 
         if (!trackPlane.Raycast(ray, out float distance))

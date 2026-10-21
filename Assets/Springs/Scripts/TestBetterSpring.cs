@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class TestBetterSpring : MonoBehaviour
@@ -19,8 +20,14 @@ public class TestBetterSpring : MonoBehaviour
     float _maxX, _minX;
     float _stepTime;
 
+    Vector3 _velocity;
+
     const float FixedStep = 1f / 120f;
 
+    void Start()
+    {
+        _velocity = new Vector3(0,0,0);     
+    }
     void Update()
     {
         // Step the spring in fixed 1/120 s chunks, however long the frame was.
@@ -45,8 +52,21 @@ public class TestBetterSpring : MonoBehaviour
 
         // TODO: Add the restoring and damping forces, find the acceleration, and take a
         // semi-implicit Euler step. Keep the velocity in a private _velocity field.
-        
-        // attachmentTransform.position = ;
+        float omega = 2f * Mathf.PI * frequencyHz;
+        float stiffness = mass*omega*omega;
+
+        float critDamping = 2f*Mathf.Sqrt(stiffness*mass);
+        float dampingCoefficient = critDamping*dampingRatio;
+
+        Vector3 displacement = attachmentTransform.position - equilibriumTransform.position;
+        Vector3 restoreForce = -stiffness * (displacement);
+        Vector3 dampingForce = dampingCoefficient*_velocity;
+
+        Vector3 acceleration = (restoreForce-dampingForce)/mass;
+        _velocity += acceleration*deltaTime;
+
+
+        attachmentTransform.position += _velocity*deltaTime;
     }
 
     void UpdateVisuals()
