@@ -1,6 +1,9 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Springs.EditModeTests.csproj" />
+  <Project Path="Springs.csproj" />
   <Project Path="Splines.csproj" />
+  <Project Path="Springs.Editor.csproj" />
   <Project Path="Splines.EditModeTests.csproj" />
   <Project Path="Splines.PlayModeTests.csproj" />
 </Solution>

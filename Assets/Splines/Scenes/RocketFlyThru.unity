@@ -47268,9 +47268,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7ef23b11f840ce4f8bb3717208424a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Curves::SplineCamera
-  path: {fileID: 2121145906}
+  path: {fileID: 973756423}
   target: {fileID: 1737236265}
-  speed: 0.01
+  speed: 0.09
   travelByDistance: 1
   faceTarget: 1
 --- !u!20 &1616656504
