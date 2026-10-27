@@ -18,6 +18,7 @@ public class TestBasicSpring : MonoBehaviour
     public float maxDisplacement;
     float _maxX, _minX;
     float _stepTime;
+    Vector3 _velocity;
 
     const float FixedStep = 1f / 120f;
 
@@ -44,7 +45,13 @@ public class TestBasicSpring : MonoBehaviour
         // TODO: Take a semi-implicit Euler step: update the velocity first, then move with the new
         // velocity.
 
-        // attachmentTransform.position = 
+        Vector3 displacement = attachmentTransform.position - equilibriumTransform.position;
+        Vector3 restoreForce = -stiffness * (displacement);
+        Vector3 dampingForce = damping*_velocity;
+
+        Vector3 acceleration = (restoreForce-dampingForce)/mass;
+        _velocity += acceleration*deltaTime;
+        attachmentTransform.position += _velocity*deltaTime;
     }
 
     void UpdateVisuals()
