@@ -57,12 +57,26 @@ public class JuicierSlider : MonoBehaviour
         // TODO: While pressed (_isPressed), set handleSpring.equilibrium to the pointer's spot on
         // the track, PointerXOnTrack(). Keep it on the track with
         // Mathf.Clamp(..., -travelHalfWidth, travelHalfWidth).
+        if (_isPressed)
+        {
+            print(PointerXOnTrack());
+            handleSpring.equilibrium = Mathf.Clamp(PointerXOnTrack(), -travelHalfWidth, travelHalfWidth);
+            pressSpring.equilibrium = 1;
+        }
+        else
+        {
+            
+            pressSpring.equilibrium = 0;
+        }
+        
 
         // TODO: Set pressSpring.equilibrium to 1 while pressed and 0 otherwise.
 
         // TODO: Step both springs with handleSpring.Advance(Time.deltaTime) and
         // pressSpring.Advance(Time.deltaTime). Don't move anything here (that happens in
         // UpdateHandleVisuals).
+        handleSpring.Advance(Time.deltaTime);
+        pressSpring.Advance(Time.deltaTime);
 
         UpdateHandleVisuals();
     }
@@ -70,16 +84,17 @@ public class JuicierSlider : MonoBehaviour
     void UpdatePressedState()
     {
         // Let go anywhere and the press ends, even off the slider.
-        if (!Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButton(0))
         {
             // TODO: On release, set handleSpring.equilibrium to the nearest slot,
             // NearestSlot(handleSpring.equilibrium). The spring carries the handle there.
             // Watch out: change the target, not the spring's value. SetValue would teleport the handle.
+            handleSpring.equilibrium = NearestSlot(handleSpring.equilibrium);
             _isPressed = false;
         }
 
         // A press only counts if the click lands on the slider or one of its parts.
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             // Debug.Log("Pressing");
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -93,9 +108,17 @@ public class JuicierSlider : MonoBehaviour
     {
         // TODO: Slide the handle: start from _restSliderPosition, add handleSpring.Value to its x,
         // and assign the result to transform.localPosition.
+        //Do slider
+        Vector3 advancedSliderPos = _restSliderPosition;
+        advancedSliderPos.x += handleSpring.Value;
+        transform.localPosition = advancedSliderPos;
 
         // TODO: Dip the top: start from _restHandlePosition, add pressDepth * pressSpring.Value to
         // its y, and assign the result to handleTransform.localPosition.
+        //Do press
+        Vector3 bleh = _restHandlePosition;
+        bleh.y += pressDepth*pressSpring.Value;
+        handleTransform.localPosition = bleh;
 
         // Watch out: start from the rest positions every frame. Adding to the current position
         // would add the offset again each frame, and the handle would drift away.
@@ -104,7 +127,7 @@ public class JuicierSlider : MonoBehaviour
     // Where the pointer is along the track, in the same units as handleSpring (0 is the middle).
     float PointerXOnTrack()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.compositionCursorPos);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane trackPlane = new(Vector3.up, transform.position);
 
         if (!trackPlane.Raycast(ray, out float distance))
