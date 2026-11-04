@@ -47,12 +47,12 @@ public class Vehicle : MonoBehaviour
     void Update()
     {
         _driveInput = 0f;
-        if (Input.GetKeyDown(KeyCode.W)) _driveInput += 1f;
-        if (Input.GetKeyDown(KeyCode.S)) _driveInput -= 1f;
+        if (Input.GetKey(KeyCode.W)) _driveInput += 1f;
+        if (Input.GetKey(KeyCode.S)) _driveInput -= 1f;
 
         float steerInput = 0f;
-        if (Input.GetKeyDown(KeyCode.D)) steerInput += 1f;
-        if (Input.GetKeyDown(KeyCode.A)) steerInput -= 1f;
+        if (Input.GetKey(KeyCode.D)) steerInput += 1f;
+        if (Input.GetKey(KeyCode.A)) steerInput -= 1f;
 
         foreach (VehicleHubData hub in hubDataList)
         {
@@ -67,23 +67,35 @@ public class Vehicle : MonoBehaviour
         {
             // TODO Part 1, setup: zero all three hub forces, then cast a ray along the hub's down.
             // On a miss, skip to the next hub with no forces left from the previous step.
-            //restpromg
             hub.SuspensionForce = hub.DriveForce = hub.GripForce = Vector3.zero;
 
             Ray groudRay = new Ray(hub.transform.position, -hub.transform.up);
-
+            if(!Physics.Raycast(groudRay, out RaycastHit groundHit, raycastLength, groundLayers)) continue;
             // TODO Part 2, spring: set the wheel visual on the road, then push along the hub's up with the spring.
+            hub.wheelVisual.transform.position = groundHit.point + hub.WheelRadius * hub.transform.up;
 
             // TODO Part 3, damper: also resist how fast this hub moves along its up.
+            Vector3 hubVelocity = carRigidBody.GetPointVelocity(hub.transform.position);
+
+            float displacement = groundHit.distance - suspensionRestDist;
+            float restoreForce = -stiffness * displacement;
+            float suspensionSpeed = Vector3.Dot(hub.transform.up, hubVelocity);
+            float dampingForce = -damping*suspensionSpeed;
+
+            hub.SuspensionForce = (restoreForce+dampingForce)* hub.transform.up;
 
             // TODO Part 4, drive: push along the hub's forward.
-            hub.DriveForce = (_driveInput * driveForce);
-
-            // TODO Part 5, wheels: find the distance rolled this step from the hub's forward speed.
-            // Divide by the wheel circumference for revolutions, then multiply by 360 for degrees and spin the wheel visual.
+            hub.DriveForce = hub.transform.forward*(_driveInput * driveForce);
 
             // TODO Part 6, grip and steering: push against how fast this hub slides along its right.
             // gripStrength affects how strong the anti-slide force is (a damper turned sideways).
+            float slippingSpeed = Vector3.Dot(hubVelocity, hub.transform.right);
+            float gripForce = -slippingSpeed*gripStrength;
+            hub.GripForce = gripForce*hub.transform.right;
+
+
+            Vector3 totalForce = hub.SuspensionForce + hub.DriveForce + hub.GripForce;
+            carRigidBody.AddForceAtPosition(totalForce, hub.transform.position);
         }
     }
 }
