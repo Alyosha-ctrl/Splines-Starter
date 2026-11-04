@@ -33,6 +33,7 @@ public class Vehicle : MonoBehaviour
 
     [Header("Steering")]
     [SerializeField] float maxSteerAngle = 30f;
+    float _steerAngle = 0f;
 
     [Header("Grip")]
     [SerializeField] float gripStrength = 750f;
@@ -57,7 +58,12 @@ public class Vehicle : MonoBehaviour
         foreach (VehicleHubData hub in hubDataList)
         {
             if (hub.Steers)
-                hub.transform.localRotation = Quaternion.Euler(0f, steerInput * maxSteerAngle, 0f);
+            {
+                _steerAngle = Mathf.MoveTowards(_steerAngle, steerInput*maxSteerAngle, 90f * Time.deltaTime);
+                Debug.Log(_steerAngle);
+                Debug.Log(steerInput*maxSteerAngle);
+                hub.transform.localRotation = Quaternion.Euler(0f, _steerAngle, 0f);
+            }  
         }
     }
 
